@@ -1,0 +1,82 @@
+name: Daily Gita post
+
+on:
+  schedule:
+    - cron: "30 0 * * *"          # 06:00 IST every day (UTC+5:30)
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Optional: force a specific day number"
+        required: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt && playwright install --with-deps chromium
+      - name: Write content, render slides, make video
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+        run: python src/generate.py ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
+      - name: Send preview to Telegram (optional)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python src/notify_telegram.py
+      - uses: actions/upload-artifact@v4
+        with: { name: post, path: out/ }
+
+  publish:
+    needs: generate
+    runs-on: ubuntu-latest
+    environment: production          # approval gate
+    permissions:
+      contents: write
+    env:
+      HAS_IG: ${{ secrets.IG_ACCESS_TOKEN != '' }}
+      HAS_YT: ${{ secrets.YT_REFRESH_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install requests google-api-python-client google-auth
+      - uses: actions/download-artifact@v4
+        with: { name: post, path: out }
+      - name: Commit slides (Instagram needs public image URLs)
+        run: |
+          DAY=$(python -c "import json;print(json.load(open('out/post.json'))['day'])")
+          echo "DAY=$DAY" >> $GITHUB_ENV
+          mkdir -p published/day-$DAY && cp out/slide*.jpg published/day-$DAY/
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git add published && git commit -m "Day $DAY slides" || true
+          git pull --rebase && git push
+      - name: Instagram carousel
+        if: env.HAS_IG == 'true'
+        continue-on-error: true
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GRAPH_VERSION: ${{ vars.GRAPH_VERSION }}
+          IMAGE_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/published/day-${{ env.DAY }}
+        run: python src/publish_instagram.py
+      - name: YouTube Short
+        if: env.HAS_YT == 'true'
+        continue-on-error: true
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_PRIVACY: ${{ vars.YT_PRIVACY }}
+        run: python src/publish_youtube.py
+      - name: Save progress (advance to next day)
+        if: always()
+        run: |
+          python src/advance_state.py
+          git add published state.json && git commit -m "Day $DAY published" || true
+          git pull --rebase && git push
+      - name: Fail if nothing was published
+        run: python -c "import json,sys;s=json.load(open('published/day-$DAY/status.json'));print(s);sys.exit(0 if s else 1)"
