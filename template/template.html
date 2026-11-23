@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="te"><head><meta charset="utf-8"><title>Gita post template</title>
+<style>
+@font-face{font-family:'Noto Sans Telugu';font-weight:700;font-style:normal;src:url(assets/fonts/NotoSansTelugu-700.woff2) format('woff2');}
+@font-face{font-family:'Noto Sans Telugu';font-weight:800;font-style:normal;src:url(assets/fonts/NotoSansTelugu-800.woff2) format('woff2');}
+@font-face{font-family:'Poppins';font-weight:600;font-style:normal;src:url(assets/fonts/Poppins-600.woff2) format('woff2');}
+@font-face{font-family:'Poppins';font-weight:700;font-style:normal;src:url(assets/fonts/Poppins-700.woff2) format('woff2');}
+@font-face{font-family:'Cormorant Garamond';font-weight:700;font-style:normal;src:url(assets/fonts/CormorantGaramond-700.woff2) format('woff2');}
+html,body{margin:0;background:#2a1a10}
+#wrap{width:1080px;display:flex;flex-direction:column;gap:40px}
+.card{position:relative;width:1080px;height:1920px;overflow:hidden;flex:none;background-repeat:no-repeat;background-size:1080px 1920px}
+.t{position:absolute;margin:0;white-space:nowrap}
+</style></head><body><div id="wrap">
+<div class="card" id="c1" style="background-image:url(assets/bg1.jpg)">
+<div class="t" style="left:34px;top:25px;width:90px;font:600 68px/1 'Poppins',sans-serif;color:#fff;text-align:center">01</div>
+<div class="t" style="left:292px;top:322px;width:500px;font:700 126px/1.3 'Poppins',sans-serif;color:#fff;letter-spacing:-2px;text-align:center">DAY {{day}}</div>
+<div class="t" style="left:93px;top:503px;width:900px;letter-spacing:-5px;font:700 85px/1.3 'Cormorant Garamond',Georgia,serif;color:#3b1a0e;text-align:center">DAILY BHAGAVAD GITA</div>
+<div class="t" data-maxh="745" style="left:110.0px;top:724px;width:860px;white-space:normal;font:800 72px/106px 'Noto Sans Telugu','Poppins',sans-serif;color:#0b0804;text-align:center;white-space:normal">{{hook}}</div>
+</div>
+<div class="card" id="c2" style="background-image:url(assets/bg2.jpg)">
+<div class="t" style="left:-96.0px;top:15.9px;width:365px;font:600 70.26px/98.36px 'Poppins',sans-serif;color:#fdfbfa;text-align:center">02</div>
+<div class="t" style="left:249.5px;top:340.9px;width:580px;font:800 90.78px/127.09px 'Noto Sans Telugu','Poppins',sans-serif;color:#fdfefd;text-align:center">నమస్తే</div>
+<div class="t" data-maxw="830" style="left:10.0px;top:556.2px;width:1060px;font:800 60.99px/85.39px 'Noto Sans Telugu','Poppins',sans-serif;color:#fefefb;text-align:center"><span class="m">అధ్యాయం {{chapter}} – {{chapter_name}}</span></div>
+<div class="t" data-maxw="330" style="left:240.5px;top:699.6px;width:640px;font:800 110.57px/154.80px 'Noto Sans Telugu','Poppins',sans-serif;color:#fdfefd;text-align:center"><span class="m">శ్లోకం {{verse}}</span></div>
+<div class="t" data-maxh="400" style="left:135.0px;top:1462.3px;width:810px;font:700 50.14px/70.55px 'Noto Sans Telugu','Poppins',sans-serif;color:#010000;text-align:center;white-space:normal">{{intro}}</div>
+</div>
+<div class="card" id="c3" style="background-image:url(assets/bg3.jpg)">
+<div class="t" style="left:-94.0px;top:16.2px;width:370px;font:600 75.43px/105.60px 'Poppins',sans-serif;color:#fdfbf9;text-align:center">03</div>
+<div class="t" style="left:322.0px;top:338.2px;width:440px;font:700 84.33px/118.07px 'Poppins',sans-serif;color:#4b0001;text-align:center">{{chapter}}.{{verse}}</div>
+<div class="t" data-maxh="290" style="left:169.5px;top:483.8px;width:740px;font:700 43.71px/73.36px 'Noto Sans Telugu','Poppins',sans-serif;color:#030001;text-align:center;white-space:normal">{{sanskrit}}</div>
+<div class="t" style="left:125.0px;top:956.4px;width:490px;font:800 74.96px/104.94px 'Noto Sans Telugu','Poppins',sans-serif;color:#fdfefd;text-align:left">భావం:</div>
+<div class="t" data-maxh="640" style="left:126.0px;top:1141.3px;width:860px;font:800 57.64px/84.48px 'Noto Sans Telugu','Poppins',sans-serif;color:#010001;text-align:left;white-space:normal">{{meaning}}</div>
+</div>
+<div class="card" id="c4" style="background-image:url(assets/bg4.jpg)">
+<div class="t" style="left:-95.5px;top:24.2px;width:380px;font:600 71.96px/100.74px 'Poppins',sans-serif;color:#fdfbf9;text-align:center">04</div>
+<div class="t" style="left:281.0px;top:338.0px;width:730px;font:800 79.46px/111.24px 'Noto Sans Telugu','Poppins',sans-serif;color:#fdfefd;text-align:left">జీవన సత్యం:</div>
+<div class="t" data-maxh="535" style="left:108.0px;top:511.5px;width:850px;font:700 42.18px/59.02px 'Noto Sans Telugu','Poppins',sans-serif;color:#020000;text-align:left;white-space:normal">{{truth}}</div>
+<div class="t" style="left:280.0px;top:1190.8px;width:850px;font:800 80.32px/112.45px 'Noto Sans Telugu','Poppins',sans-serif;color:#fdfefd;text-align:left">జీవితానికి పాఠం:</div>
+<div class="t" data-maxh="500" style="left:108.0px;top:1375.5px;width:850px;font:700 42.16px/59.32px 'Noto Sans Telugu','Poppins',sans-serif;color:#020000;text-align:left;white-space:normal">{{lesson}}</div>
+</div>
+<div class="card" id="c5" style="background-image:url(assets/bg5.jpg)">
+<div class="t" style="left:149.0px;top:695.6px;width:790px;font:700 130.51px/182.72px 'Cormorant Garamond',Georgia,serif;color:#2b0d01;text-align:center">FOLLOW</div>
+<div class="t" style="left:105.5px;top:842.7px;width:875px;font:700 101.55px/142.17px 'Cormorant Garamond',Georgia,serif;color:#590201;text-align:center">SLOKAS AND</div>
+<div class="t" style="left:-22.0px;top:960.8px;width:1130px;font:700 97.08px/135.91px 'Cormorant Garamond',Georgia,serif;color:#580201;text-align:center">MANTRAS TELUGU</div>
+<div class="t" style="left:221.5px;top:1143.4px;width:640px;font:700 72.82px/101.95px 'Cormorant Garamond',Georgia,serif;color:#fdf5eb;text-align:center">FOR MORE</div>
+<div class="t" style="left:79.5px;top:1487.8px;width:920px;font:700 32.93px/46.10px 'Cormorant Garamond',Georgia,serif;color:#1f0e01;text-align:center">SPIRITUAL WISDOM • DAILY GITA SLOKAS</div>
+<div class="t" style="left:180.0px;top:1530.6px;width:720px;font:700 31.74px/44.44px 'Cormorant Garamond',Georgia,serif;color:#1e0d01;text-align:center">MANTRAS FOR INNER PEACE</div>
+</div>
+</div>
+<script>document.fonts.ready.then(function(){
+ document.querySelectorAll('[data-maxh]').forEach(function(e){var mh=+e.dataset.maxh,cs=getComputedStyle(e),fs=parseFloat(cs.fontSize),r=parseFloat(cs.lineHeight)/fs,n=0;
+  while(e.scrollHeight>mh&&fs>22&&n++<90){fs*=.97;e.style.fontSize=fs+'px';e.style.lineHeight=(fs*r)+'px';}});
+ document.querySelectorAll('[data-maxw]').forEach(function(e){var mw=+e.dataset.maxw,s=e.querySelector('.m'),fs=parseFloat(getComputedStyle(e).fontSize),n=0;
+  while(s.getBoundingClientRect().width>mw&&fs>20&&n++<90){fs*=.97;e.style.fontSize=fs+'px';}});
+ window.__ready=true;});</script></body></html>
