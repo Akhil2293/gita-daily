@@ -1,4 +1,4 @@
-"""Pick the next verse, ask Gemini (free tier) for Telugu content, render slides + video."""
+"""Pick the next verse, ask an AI for Telugu content, render slides + video."""
 import argparse, json, os, re, sys, time, requests
 from indic_transliteration import sanscript
 from common import *
@@ -37,20 +37,49 @@ Return ONLY JSON with these keys (all values Telugu, no markdown):
 "yt_title": <=60 characters Telugu title mentioning the verse number.
 Keep it respectful, non-sectarian, no medical/financial claims."""
 
-def gemini(prompt):
+KEYS = ("hook", "intro", "meaning", "life_truth", "life_lesson", "caption", "yt_title")
+def parse(text):
+    """Pull the JSON object out of a model reply and make sure it is complete and in Telugu."""
+    text = re.sub(r"```(?:json)?", "", text)
+    m = re.search(r"\{.*\}", text, re.S)
+    d = json.loads(m.group(0))
+    if not all(isinstance(d.get(k), str) and d[k].strip() for k in KEYS): raise ValueError("missing keys")
+    te = lambda t: sum("\u0c00" <= ch <= "\u0c7f" for ch in t) / max(len(t), 1)
+    if te(d["hook"]) < 0.4 or te(d["meaning"]) < 0.4: raise ValueError("not Telugu")
+    return d
+
+def ask_openrouter(prompt):
+    key = os.environ["OPENROUTER_API_KEY"]
+    models = [m.strip() for m in os.environ.get("OPENROUTER_MODEL", "openrouter/free").split(",") if m.strip()]
+    for i in range(8):
+        model = models[i % len(models)]
+        try:
+            r = requests.post("https://openrouter.ai/api/v1/chat/completions", timeout=180,
+                              headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                              json={"model": model, "temperature": 0.8, "messages": [{"role": "user", "content": prompt}]})
+            if r.status_code == 200:
+                print("model used:", r.json().get("model"))
+                return parse(r.json()["choices"][0]["message"]["content"])
+            print("OpenRouter", model, r.status_code, r.text[:200])
+        except Exception as e: print("retry:", model, e)
+        time.sleep(10 * (i + 1))
+    sys.exit("OpenRouter failed")
+
+def ask_gemini(prompt):
     key = os.environ["GEMINI_API_KEY"]
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
     body = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"responseMimeType": "application/json", "temperature": 0.8}}
     for i in range(4):
         r = requests.post(url, headers={"x-goog-api-key": key}, json=body, timeout=120)
         if r.status_code == 200:
-            try:
-                d = json.loads(r.json()["candidates"][0]["content"]["parts"][0]["text"])
-                if all(d.get(k) for k in ("hook","intro","meaning","life_truth","life_lesson","caption","yt_title")): return d
-            except Exception as e: print("bad JSON from model:", e)
+            try: return parse(r.json()["candidates"][0]["content"]["parts"][0]["text"])
+            except Exception as e: print("bad reply:", e)
         else: print("Gemini", r.status_code, r.text[:200])
         time.sleep(8 * (i + 1))
     sys.exit("Gemini failed")
+
+def llm(prompt):
+    return ask_openrouter(prompt) if os.environ.get("OPENROUTER_API_KEY") else ask_gemini(prompt)
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--day", type=int); ap.add_argument("--sample", action="store_true")
@@ -67,7 +96,7 @@ def main():
     else:
         tr = [t for t in fetch("translation.json") if t["verse_id"] == verse["id"] and t["lang"] == "english"]
         en = [t["description"] for t in tr[:2]] + ["", ""]
-        c = gemini(PROMPT.format(ch=ch, v=v, chname=CHAPTERS_TE[ch], sa=verse["text"].strip(), en1=en[0], en2=en[1]))
+        c = llm(PROMPT.format(ch=ch, v=v, chname=CHAPTERS_TE[ch], sa=verse["text"].strip(), en1=en[0], en2=en[1]))
     fields = dict(day=day, chapter=ch, verse=v, chapter_name=CHAPTERS_TE[ch], sanskrit=sa, hook=c["hook"], intro=c["intro"],
                   meaning=c["meaning"], truth=c["life_truth"], lesson=c["life_lesson"])
     OUT.mkdir(exist_ok=True)
