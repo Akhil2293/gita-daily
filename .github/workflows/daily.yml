@@ -21,8 +21,6 @@ jobs:
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
         run: python src/generate.py ${{ inputs.day && format('--day {0}', inputs.day) || '' }}
       - name: Send preview to Telegram (optional)
         env:
@@ -35,7 +33,7 @@ jobs:
   publish:
     needs: generate
     runs-on: ubuntu-latest
-    environment: production          # <- add yourself as "required reviewer" = approval gate
+    environment: production          # approval gate
     permissions:
       contents: write
     env:
