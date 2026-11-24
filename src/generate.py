@@ -1,10 +1,9 @@
-"""Pick the next verse, ask an AI for Telugu content, render slides + video."""
+"""Pick the next verse, ask an AI (OpenRouter) for Telugu content, render slides + video."""
 import argparse, json, os, re, sys, time, requests
 from indic_transliteration import sanscript
 from common import *
 
 RAW = "https://raw.githubusercontent.com/gita/gita/main/data/"
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 def fetch(name):
     BUILD.mkdir(exist_ok=True)
@@ -50,7 +49,7 @@ def parse(text):
 
 def ask_openrouter(prompt):
     key = os.environ["OPENROUTER_API_KEY"]
-    models = [m.strip() for m in os.environ.get("OPENROUTER_MODEL", "openrouter/free").split(",") if m.strip()]
+    models = [m.strip() for m in (os.environ.get("OPENROUTER_MODEL") or "openrouter/free").split(",") if m.strip()]
     for i in range(8):
         model = models[i % len(models)]
         try:
@@ -65,21 +64,8 @@ def ask_openrouter(prompt):
         time.sleep(10 * (i + 1))
     sys.exit("OpenRouter failed")
 
-def ask_gemini(prompt):
-    key = os.environ["GEMINI_API_KEY"]
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
-    body = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"responseMimeType": "application/json", "temperature": 0.8}}
-    for i in range(4):
-        r = requests.post(url, headers={"x-goog-api-key": key}, json=body, timeout=120)
-        if r.status_code == 200:
-            try: return parse(r.json()["candidates"][0]["content"]["parts"][0]["text"])
-            except Exception as e: print("bad reply:", e)
-        else: print("Gemini", r.status_code, r.text[:200])
-        time.sleep(8 * (i + 1))
-    sys.exit("Gemini failed")
-
 def llm(prompt):
-    return ask_openrouter(prompt) if os.environ.get("OPENROUTER_API_KEY") else ask_gemini(prompt)
+    return ask_openrouter(prompt)
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--day", type=int); ap.add_argument("--sample", action="store_true")
