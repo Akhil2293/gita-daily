@@ -68,6 +68,7 @@ def llm(prompt):
     return ask_openrouter(prompt)
 
 def main():
+    print("generate.py v3 - OpenRouter only")
     ap = argparse.ArgumentParser(); ap.add_argument("--day", type=int); ap.add_argument("--sample", action="store_true")
     a = ap.parse_args()
     day = a.day or load_state()["next_day"]
